@@ -13,6 +13,7 @@ this file and include it in basic-server.js so that it actually works.
 **************************************************************/
 
 var url = require("url");   //**
+//this will hold our data
 var posts = {results:[]};
 var requestHandler = function(request, response) {
 
@@ -47,20 +48,12 @@ var requestHandler = function(request, response) {
   // which includes the status and all headers.
   response.writeHead(statusCode, headers);
 
-  var fakeResponse = {
-      results: [
-            {roomname: 'lobby', username: 'joe', text: 'hey'},
-            {roomname: 'kitchen', username: 'alon', text: 'what is up'}
-            ]
-  };
-
-
   // Tell the client we are sending them plain text.
   //
   // You will need to change this if you are sending something
   // other than plain text, like JSON or HTML.
   headers['Content-Type'] = "application/json";
-
+  //POST method
   if (request.method === 'POST') {
     response.writeHead(201, headers);
     var body = '';
@@ -72,18 +65,16 @@ var requestHandler = function(request, response) {
       var post = body;
       posts.results.push(JSON.parse(post));
     })
-    response.end(JSON.stringify(posts))
+    //response.end(JSON.stringify(posts))
   }
 
 
-
-  if(request.method === 'GET'){
-    response.end(JSON.stringify(posts))
-  }
-  /*
-  var fakeResponse = {results: [{roomname: 'lobby', username: 'joe', text: 'hey'},
-    {roomname: 'kitchen', username: 'alon', text: 'what is up'}]}
-  */
+  // we tried this below, it worked but do not need it for tests to pass
+  // seems that the 'default' request.method === 'GET'
+  // if(request.method === 'GET'){
+  //   response._data = JSON.stringify(posts);
+  //   // response.end(response._data);
+  // }
 
   // Make sure to always call response.end() - Node may not send
   // anything back to the client until you do. The string you pass to
@@ -92,7 +83,7 @@ var requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-  response.end("Hello, World!");
+  response.end(JSON.stringify(posts));
 };
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).

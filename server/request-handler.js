@@ -1,3 +1,13 @@
+var fs = require("fs");
+var d;
+fs.readFile('alon.html', 'utf8', function (err,data) {
+  if (err) {
+  return console.log(err);
+  }
+  d = data;
+  console.log(data);
+});
+
 /*************************************************************
 
 You should implement your request handler function in this file.
@@ -12,8 +22,8 @@ this file and include it in basic-server.js so that it actually works.
 
 **************************************************************/
 
-var url = require("url");   //**
-//this will hold our data
+//this will hold our data it is a global object so that each
+//new request won't overwrite it
 var posts = {results:[]};
 var requestHandler = function(request, response) {
 
@@ -36,6 +46,7 @@ var requestHandler = function(request, response) {
   // The outgoing status.
   var statusCode = 200;
 
+  //check that requests are to the correct server path
   if (request.url.slice(0,8) !== '/classes') {
     response.writeHead(404, headers);
     response.end();
@@ -52,10 +63,15 @@ var requestHandler = function(request, response) {
   //
   // You will need to change this if you are sending something
   // other than plain text, like JSON or HTML.
+
+  //changed to json in order to send data
   headers['Content-Type'] = "application/json";
+
   //POST method
   if (request.method === 'POST') {
+    //change statuscode to 201 to send back to client side
     response.writeHead(201, headers);
+    //'data' comes in chunks so you must concatenate???
     var body = '';
     request.on('data', function (data) {
       body += data;
@@ -63,11 +79,26 @@ var requestHandler = function(request, response) {
     });
     request.on('end', function(){
       var post = body;
+      //add data to our data object
       posts.results.push(JSON.parse(post));
     })
     //response.end(JSON.stringify(posts))
   }
 
+  if(request.method === 'GET' && request.url === '/secret/place'){
+    console.log('secret place requested');
+    var body = '<html>' + '<head>' + '<meta http-equiv="Content-Type"' +
+    ' content="text/html; charset=UTF-8" />' +
+    '</head>' + '<body>' +
+    '<form action="/upload" method="post">' +
+    '<textarea name="text" rows="20" cols="60"></textarea>' +
+    '<input type="submit" value="Submit text" />' + '</form>' +
+    '</body>' + '</html>';
+
+    response.writeHead(200, {"Content-Type": "text/html"});
+    //response.write(body);
+    //response.end();
+  }
 
   // we tried this below, it worked but do not need it for tests to pass
   // seems that the 'default' request.method === 'GET'
